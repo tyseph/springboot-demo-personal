@@ -2,55 +2,72 @@ package com.capgemini.springboot.demo.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.capgemini.springboot.demo.model.Employee;
 import com.capgemini.springboot.demo.service.EmployeeService;
 
 @RestController
+@RequestMapping("/emp")
 public class EmployeeController {
+
+	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private EmployeeService service;
 
-	@GetMapping("/get-employee-by-id")
-	public Employee getEmployeeBtId() {
-		int id = 106;
-		System.out.println("Employee Controller : get-by-id");
-		return service.getEmpById(id);
+	@GetMapping("/get-employee-by-id/{eid}")
+	public ResponseEntity<Employee> getEmployeeBtId(@PathVariable(name = "eid") int id) {
+//		int id = 106;
+		LOG.info("Employee Controller : get-by-id");
+//		return service.getEmpById(id);
+		Employee emp = service.getEmpById(id);
+		HttpHeaders header = new HttpHeaders();
+		header.add("message", "Employee" + id + " not found");
+		ResponseEntity<Employee> response = new ResponseEntity<>(emp, header, HttpStatus.OK);
+		return response;
 	}
 
 	@GetMapping("/get-all-employees")
-	public List<Employee> getAllEmployees() {
-		return null;
+	public ResponseEntity<List<Employee>> getAllEmployees() {
+//		HttpHeaders header = new HttpHeaders().add("message", "Success");
+		return new ResponseEntity<>(service.getAllEmp(), HttpStatus.OK);
+//		return null;
 	}
 
-	@GetMapping("/add-employee")
-	public Employee addEmployee() {
-		int id = 106;
-		String firstName = "Shyam";
-		double salary = 1000000;
-		service.addEmp(id, firstName, salary);
-		System.out.println("----------EMPLOYEE ADDED----------");
-		return null;
+	@PostMapping("/add-employee")
+	public ResponseEntity<List<Employee>> addEmployee(@RequestBody Employee employee) {
+//		service.addEmp(, firstName, salary);
+		LOG.info("----------EMPLOYEE ADDED----------");
+		return new ResponseEntity<>(service.addEmp(employee), HttpStatus.OK);
 	}
 
-	@GetMapping("/update-employee")
-	public Employee updateEmployee() {
-		int id = 103;
-		service.updateEmp(id);
-		System.out.println("----------EMPLOYEE SALARY UPDATED----------");
-		return null;
+	@PostMapping("/update-employee/{eid}")
+	public ResponseEntity<Employee> updateEmployee(@PathVariable(name = "eid") int id) {
+//		int id = 103;
+		LOG.info("----------EMPLOYEE SALARY UPDATED----------");
+		return new ResponseEntity<>(service.updateEmp(id), HttpStatus.OK);
+//		return null;
 	}
 
-	@GetMapping("/update-employee")
-	public Employee deleteEmployee() {
-		int id = 104;
-		service.deleteEmp(id);
+	@DeleteMapping("/delete-employee/{eid}")
+	public ResponseEntity<Employee> deleteEmployee(@PathVariable(name = "eid") int id) {
+//		int id = 104;
 		System.out.println("----------EMPLOYEE DELETED----------");
-		return null;
+		return new ResponseEntity<>(service.deleteEmp(id), HttpStatus.OK);
+
 	}
 
 }
